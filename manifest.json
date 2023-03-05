@@ -22,5 +22,5 @@
     }
   ],
   "permissions": ["tabs"],
-  "web_accessible_resources": ["content.js", "background.js", "content.js.map", "background.js.map"]
+  "web_accessible_resources": ["content.js", "background.js"]
 }

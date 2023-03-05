@@ -3,6 +3,7 @@
     "target": "es5",
     "module": "es6",
     "lib": ["es2017", "dom"],
+    "allowJs": false,
     "strict": true,
     "esModuleInterop": true,
     "outDir": "dist",
