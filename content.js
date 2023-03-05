@@ -42,7 +42,6 @@ class Timer {
     }
 }
 
-
 class Model {
     constructor() {
         // Create two instances of the Timer class: countupTimer and focusTimer
@@ -50,7 +49,12 @@ class Model {
         this.countupTimer.start();
         this.focusTimer = new Timer(() => { }, 1000);
         this.focusTimer.start();
+
+        // Listen for the visibilitychange event and handle it
         document.addEventListener('visibilitychange', this.handleVisibilityChange);
+
+        // Listen for the blur event and handle it
+        window.addEventListener('blur', this.handleBlur);
     }
 
     // Handle the visibilitychange event by pausing or resuming the focus timer
@@ -62,6 +66,12 @@ class Model {
             this.focusTimer.resume();
             console.log('Resume focus timer @ ' + this.focusTimer.elapsedTime);
         }
+    };
+
+    // Handle the blur event by pausing the focus timer
+    handleBlur = () => {
+        this.focusTimer.pause();
+        console.log('Pause focus timer @ ' + this.focusTimer.elapsedTime);
     };
 }
 
