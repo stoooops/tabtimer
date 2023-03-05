@@ -16,5 +16,10 @@
   ],
   "browser_action": {
     "default_popup": "popup.html" // Add a browser action popup to allow the user to reload the extension
+  },
+  "icons": {
+    "32": "icons/favicon32.png",
+    "64": "icons/favicon32.png",
+    "128": "icons/favicon128.png"
   }
 }
