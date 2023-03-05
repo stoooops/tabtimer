@@ -1,3 +1,3 @@
 chrome.runtime.onInstalled.addListener(() => {
-    console.log('Tab Nanny installed!!!');
-});
+  console.log('Extension installed!')
+})

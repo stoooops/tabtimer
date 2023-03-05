@@ -1,12 +1,19 @@
 {
   "manifest_version": 2,
   "name": "Tab Nanny",
-  "version": "1.0",
   "description": "Watch how much time you've spent on Twitter today.",
-  "permissions": ["tabs"],
+  "version": "1.0",
+  "icons": {
+    "32": "public/favicon32.png",
+    "64": "public/favicon32.png",
+    "128": "public/favicon128.png"
+  },
+  "browser_action": {
+    "default_popup": "public/popup.html"
+  },
   "background": {
     "scripts": ["background.js"],
-    "persistent": false // Set this to false to allow the background page to unload when the extension is reloaded
+    "persistent": false
   },
   "content_scripts": [
     {
@@ -14,12 +21,6 @@
       "js": ["content.js"]
     }
   ],
-  "browser_action": {
-    "default_popup": "popup.html" // Add a browser action popup to allow the user to reload the extension
-  },
-  "icons": {
-    "32": "icons/favicon32.png",
-    "64": "icons/favicon32.png",
-    "128": "icons/favicon128.png"
-  }
+  "permissions": ["tabs"],
+  "web_accessible_resources": ["content.js", "background.js", "content.js.map", "background.js.map"]
 }
