@@ -3,6 +3,6 @@ import View from './View'
 
 export default class Controller {
   constructor(private model: Model, private view: View) {
-    setInterval(() => this.view.updateTimerText(), 1000)
+    setInterval(() => this.view.updateDisplayText(), 1000)
   }
 }

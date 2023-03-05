@@ -1,11 +1,13 @@
 {
   "name": "tabnanny",
   "version": "0.0.1",
+  "description": "A chrome extension to help you watch how much time you've spent on a website as an overlay.",
   "main": "index.js",
   "author": "Cory Gabrielsen <corygabrielsen@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "build": "rm -rf dist/* && webpack"
+    "build": "rm -rf dist/* && webpack",
+    "watch": "webpack --watch"
   },
   "devDependencies": {
     "@types/chrome": "^0.0.219",

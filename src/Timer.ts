@@ -9,6 +9,8 @@ enum TimerState {
   PAUSED = 'paused',
 }
 
+type TickCallback = (elapsed: number) => void
+
 // Timer class encapsulates the timer logic
 export default class Timer {
   private timerId: number | null = null
@@ -18,16 +20,21 @@ export default class Timer {
   public elapsed: number = 0
   public state: TimerState = TimerState.NOT_STARTED
 
-  constructor(public type: TimerType, private interval: number) {}
+  constructor(public type: TimerType, private interval: number, private callback: TickCallback) {}
 
+  // Update the elapsed time and call the tick callback function
+  private updateElapsed(val: number) {
+    this.elapsed = val
+    this.callback(this.elapsed) // Call the tick callback function with the elapsed time
+  }
+
+  // Tick function called by setInterval
   tick() {
     if (this.startTime === null) {
       return
     }
     // const before = this.elapsed
-    this.elapsed = Date.now() - this.startTime - this.elapsedPause
-    // const after = this.elapsed
-    // console.log(`${this.type} tick ${before} -> ${after}`)
+    this.updateElapsed(Date.now() - this.startTime - this.elapsedPause)
   }
 
   // Start the timer
@@ -60,14 +67,16 @@ export default class Timer {
     if (this.timerId === null) {
       throw new Error(`timerId is null but state is ${this.state}`)
     }
+    // Stop the timer
     clearInterval(this.timerId)
     this.timerId = null
     this.startTime = null
-    this.elapsed = 0
+    this.updateElapsed(0)
     this.pauseTime = null
     this.elapsedPause = 0
   }
 
+  // Pause the timer
   pause() {
     if (this.state === TimerState.PAUSED) {
       console.warn(`${this.type} timer is already paused`)
@@ -81,9 +90,11 @@ export default class Timer {
     if (this.timerId === null) {
       throw new Error(`timerId is null but state is ${this.state}`)
     }
+    // Stop the timer
     clearInterval(this.timerId)
   }
 
+  // Unpause the timer
   unpause() {
     if (this.state === TimerState.RUNNING) {
       console.warn(`${this.type} timer is already running`)

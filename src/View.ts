@@ -18,9 +18,12 @@ function nowTime(): string {
   return `${new Date().toLocaleTimeString('en-US', { hour12: false })}`
 }
 
+type DisplayClockType = TimerType | 'today'
+const DISPLAY_ORDER: DisplayClockType[] = ['today', TimerType.FOCUS, TimerType.COUNTUP]
+
 export default class View {
   private div: HTMLDivElement
-  private timerType: TimerType = TimerType.FOCUS
+  private displayClock: DisplayClockType = DISPLAY_ORDER[0]
   constructor(private model: Model) {
     this.div = document.createElement('div')
     this.div.style.position = 'fixed'
@@ -50,34 +53,56 @@ export default class View {
     triangle.style.transform = 'translateX(-50%)'
 
     this.div.appendChild(triangle)
-    this.updateTimerText()
+    this.updateDisplayText()
     this.div.addEventListener('click', this.handleClick)
 
     document.body.appendChild(this.div)
+
+    // Listen for the visibilitychange event and handle it
+    document.addEventListener('visibilitychange', this.handleVisibilityChange)
+
+    // Listen for the blur event and handle it
+    window.addEventListener('blur', this.handleBlur)
+
+    // Listen for the focus event and handle it
+    window.addEventListener('focus', this.handleFocus)
   }
 
-  changeTimerType = () => {
-    if (this.timerType === TimerType.COUNTUP) {
-      this.timerType = TimerType.FOCUS
-    } else if (this.timerType === TimerType.FOCUS) {
-      this.timerType = TimerType.COUNTUP
-    } else {
-      console.error(`Invalid timer type: ${this.timerType}`)
+  changeDisplayClock = () => {
+    // rotate array according to DISPLAY_ORDER
+    const index = DISPLAY_ORDER.indexOf(this.displayClock)
+    this.displayClock = DISPLAY_ORDER[(index + 1) % DISPLAY_ORDER.length]
+    this.updateDisplayText()
+  }
+
+  // Update the timer text every second
+  updateDisplayText() {
+    const elapsed = this.model.elapsed()
+    // console.log(`${nowTime()} ${JSON.stringify(elapsed)}`)
+
+    if (this.displayClock in elapsed) {
+      this.div.innerText = `${this.displayClock[0]} ${formatTime(elapsed[this.displayClock].elapsed as number)}`
     }
   }
 
   handleClick = () => {
-    this.changeTimerType()
-    this.updateTimerText()
+    this.changeDisplayClock()
   }
 
-  // Update the timer text every second
-  updateTimerText() {
-    const elapsed = this.model.elapsed()
-    // console.log(`${nowTime()} ${JSON.stringify(elapsed)}`)
+  handleBlur = () => {
+    // nothing to do
+  }
 
-    if (this.timerType in elapsed) {
-      this.div.innerText = `${this.timerType[0]} ${formatTime(elapsed[this.timerType].elapsed as number)}`
+  handleFocus = () => {
+    // update the display text
+    this.updateDisplayText()
+  }
+
+  handleVisibilityChange = () => {
+    if (document.hidden) {
+      // nothing to do
+    } else {
+      this.updateDisplayText()
     }
   }
 }

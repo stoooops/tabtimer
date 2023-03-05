@@ -1,5 +1,4 @@
 import Timer, { TimerType } from './Timer'
-
 function nowTime(): string {
   return `${new Date().toLocaleTimeString('en-US', { hour12: false })}`
 }
@@ -7,11 +6,12 @@ function nowTime(): string {
 export default class Model {
   private countupTimer: Timer
   private focusTimer: Timer
+  private lastFocusCallbackElapsed: number = 0
   constructor() {
     // Create two instances of the Timer class: countupTimer and focusTimer
-    this.countupTimer = new Timer(TimerType.COUNTUP, 1000)
+    this.countupTimer = new Timer(TimerType.COUNTUP, 1000, this.countupCallback.bind(this))
     this.countupTimer.start()
-    this.focusTimer = new Timer(TimerType.FOCUS, 1000)
+    this.focusTimer = new Timer(TimerType.FOCUS, 1000, this.focusCallback.bind(this))
     this.focusTimer.start()
 
     // Listen for the visibilitychange event and handle it
@@ -22,6 +22,26 @@ export default class Model {
 
     // Listen for the focus event and handle it
     window.addEventListener('focus', this.handleFocus)
+
+    // daemon to log the "elapsed" state every 3 seconds
+    setInterval(() => {
+      console.log(JSON.stringify(this.elapsed()))
+    }, 3000)
+  }
+
+  countupCallback = (elapsed: number) => {
+    // do nothing
+  }
+
+  // add diff to the storage
+  focusCallback = (elapsed: number) => {
+    const diff = elapsed - this.lastFocusCallbackElapsed
+    localStorage.setItem('focusTimer_elapsed_today', String(this.getStorageElapsedToday() + diff))
+    this.lastFocusCallbackElapsed = elapsed
+  }
+
+  private getStorageElapsedToday(): number {
+    return Number(localStorage.getItem('focusTimer_elapsed_today'))
   }
 
   elapsed(): Record<string, Record<string, string | number>> {
@@ -33,6 +53,10 @@ export default class Model {
       focus: {
         elapsed: this.elapsedFocusTime(),
         state: this.focusTimer.state,
+      },
+      today: {
+        elapsed: this.getStorageElapsedToday(),
+        state: this.focusTimer.state, // same as focus timer
       },
     }
   }

@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "Tab Nanny",
-  "description": "Watch how much time you've spent on Twitter today.",
+  "description": "Watch how much time you've spent on a website today.",
   "version": "1.0",
   "icons": {
     "32": "public/favicon32.png",
@@ -17,7 +17,32 @@
   },
   "content_scripts": [
     {
-      "matches": ["*://*.twitter.com/*"],
+      "matches": [
+        "*://blank.org/*",
+        "*://*.twitter.com/*",
+        "*://*.facebook.com/*",
+        "*://*.reddit.com/*",
+        "*://*.youtube.com/*",
+        "*://*.instagram.com/*",
+        "*://*.tumblr.com/*",
+        "*://*.pinterest.com/*",
+        "*://*.linkedin.com/*",
+        "*://*.quora.com/*",
+        "*://*.twitch.tv/*",
+        "*://*.tiktok.com/*",
+        "*://*.snapchat.com/*",
+        "*://*.discord.com/*",
+        "*://*.whatsapp.com/*",
+        "*://*.slack.com/*",
+        "*://*.messenger.com/*",
+        "*://*.telegram.org/*",
+        "*://*.discordapp.com/*",
+        "*://*.skype.com/*",
+        "*://*.zoom.us/*",
+        "*://*.meet.google.com/*",
+        "*://*.hangouts.google.com/*",
+        "*://*.me"
+      ],
       "js": ["content.js"]
     }
   ],
