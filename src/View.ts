@@ -1,4 +1,5 @@
 import Model from './Model'
+import { TimerType } from './Timer'
 
 // Pad a number with leading zeros to make it two digits long
 function pad(num: number): string {
@@ -6,19 +7,21 @@ function pad(num: number): string {
 }
 
 // Format a time in seconds as hh:mm:ss
-function formatTime(time: number): `${string}:${string}:${string}` {
-  const hours = Math.floor(time / 3600)
-  const minutes = Math.floor((time - hours * 3600) / 60)
-  const seconds = time - hours * 3600 - minutes * 60
-  return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`
+function formatTime(millis: number): `${string}:${string}:${string}` {
+  const seconds = Math.floor(millis / 1000)
+  const minutes = Math.floor(seconds / 60)
+  const hours = Math.floor(minutes / 60)
+  return `${pad(hours)}:${pad(minutes % 60)}:${pad(seconds % 60)}`
+}
+
+function nowTime(): string {
+  return `${new Date().toLocaleTimeString('en-US', { hour12: false })}`
 }
 
 export default class View {
   private div: HTMLDivElement
-  private timerType: string
+  private timerType: TimerType = TimerType.FOCUS
   constructor(private model: Model) {
-    this.model = model
-    this.timerType = 'focus'
     this.div = document.createElement('div')
     this.div.style.position = 'fixed'
     this.div.style.top = '0'
@@ -54,12 +57,12 @@ export default class View {
   }
 
   changeTimerType = () => {
-    if (this.timerType === 'countup') {
-      this.timerType = 'focus'
-    } else if (this.timerType === 'focus') {
-      this.timerType = 'countup'
+    if (this.timerType === TimerType.COUNTUP) {
+      this.timerType = TimerType.FOCUS
+    } else if (this.timerType === TimerType.FOCUS) {
+      this.timerType = TimerType.COUNTUP
     } else {
-      console.error('Invalid timer type: ' + this.timerType)
+      console.error(`Invalid timer type: ${this.timerType}`)
     }
   }
 
@@ -70,18 +73,11 @@ export default class View {
 
   // Update the timer text every second
   updateTimerText() {
-    let elapsedTime = undefined
-    if (this.timerType === 'countup') {
-      elapsedTime = this.model.elapsedCountupTime()
-    } else if (this.timerType === 'focus') {
-      elapsedTime = this.model.elapsedFocusTime()
-    } else {
-      console.error('Invalid timer type: ' + this.timerType)
-    }
-    console.log(`${this.timerType} elapsedTime: ${elapsedTime}`)
+    const elapsed = this.model.elapsed()
+    // console.log(`${nowTime()} ${JSON.stringify(elapsed)}`)
 
-    if (elapsedTime !== undefined) {
-      this.div.innerText = `${this.timerType[0]} ${formatTime(elapsedTime)}`
+    if (this.timerType in elapsed) {
+      this.div.innerText = `${this.timerType[0]} ${formatTime(elapsed[this.timerType].elapsed as number)}`
     }
   }
 }

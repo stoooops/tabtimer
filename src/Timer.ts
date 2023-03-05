@@ -1,56 +1,99 @@
+export enum TimerType {
+  COUNTUP = 'countup',
+  FOCUS = 'focus',
+}
+
+enum TimerState {
+  NOT_STARTED = 'not_started',
+  RUNNING = 'running',
+  PAUSED = 'paused',
+}
+
 // Timer class encapsulates the timer logic
 export default class Timer {
   private timerId: number | null = null
   private startTime: number | null = null
-  public elapsedTime: number = 0
+  private pauseTime: number | null = null
+  private elapsedPause: number = 0
+  public elapsed: number = 0
+  public state: TimerState = TimerState.NOT_STARTED
 
-  constructor(private callback: () => void, private interval: number) {}
+  constructor(public type: TimerType, private interval: number) {}
+
+  tick() {
+    if (this.startTime === null) {
+      return
+    }
+    // const before = this.elapsed
+    this.elapsed = Date.now() - this.startTime - this.elapsedPause
+    // const after = this.elapsed
+    // console.log(`${this.type} tick ${before} -> ${after}`)
+  }
 
   // Start the timer
   start() {
+    if (this.state === TimerState.RUNNING) {
+      return
+    }
+    if (this.state === TimerState.PAUSED) {
+      // error condition unexpected
+      throw new Error('Cannot start a paused timer, must resume')
+    }
+    if (this.state !== TimerState.NOT_STARTED) {
+      // error condition unexpected
+      throw new Error('Cannot start a timer that is not in the NOT_STARTED state')
+    }
+    this.state = TimerState.RUNNING
     this.startTime = Date.now()
-    this.timerId = setInterval(() => {
-      if (this.startTime === null) {
-        return
-      }
-      this.elapsedTime = Math.floor((Date.now() - this.startTime) / 1000)
-      this.callback()
-    }, this.interval)
+    this.timerId = setInterval(this.tick.bind(this), this.interval)
   }
 
   // Stop the timer and reset the elapsed time
   stop() {
-    if (this.timerId === null) {
+    if (this.state === TimerState.NOT_STARTED) {
       return
+    }
+    if (this.state !== TimerState.RUNNING && this.state !== TimerState.PAUSED) {
+      // error condition unexpected
+      throw new Error('Cannot stop a timer that is not in the RUNNING or PAUSED state')
+    }
+    if (this.timerId === null) {
+      throw new Error(`timerId is null but state is ${this.state}`)
     }
     clearInterval(this.timerId)
     this.timerId = null
     this.startTime = null
-    this.elapsedTime = 0
+    this.elapsed = 0
+    this.pauseTime = null
+    this.elapsedPause = 0
   }
 
-  // Pause the timer and save the elapsed time in seconds
   pause() {
-    if (this.timerId === null) {
+    if (this.state === TimerState.PAUSED) {
+      console.warn(`${this.type} timer is already paused`)
       return
+    }
+    if (this.state !== TimerState.RUNNING) {
+      throw new Error(`Cannot pause a timer that is not in the RUNNING state. (state = ${this.state})`)
+    }
+    this.state = TimerState.PAUSED
+    this.pauseTime = Date.now()
+    if (this.timerId === null) {
+      throw new Error(`timerId is null but state is ${this.state}`)
     }
     clearInterval(this.timerId)
-    this.timerId = null
-    if (this.startTime === null) {
-      return
-    }
-    this.elapsedTime = Math.floor((Date.now() - this.startTime) / 1000)
   }
 
-  // Resume the timer and restore the elapsed time
-  resume() {
-    this.startTime = Date.now() - this.elapsedTime * 1000
-    this.timerId = setInterval(() => {
-      if (this.startTime === null) {
-        return
-      }
-      this.elapsedTime = Math.floor((Date.now() - this.startTime) / 1000)
-      this.callback()
-    }, this.interval)
+  unpause() {
+    if (this.state === TimerState.RUNNING) {
+      console.warn(`${this.type} timer is already running`)
+      return
+    }
+    if (this.state !== TimerState.PAUSED) {
+      throw new Error(`Cannot unpause a timer that is not in the PAUSED state. (state = ${this.state})`)
+    }
+    this.state = TimerState.RUNNING
+    this.elapsedPause += Date.now() - this.pauseTime!
+    this.timerId = setInterval(this.tick.bind(this), this.interval)
   }
 }
