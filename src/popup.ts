@@ -1,9 +1,22 @@
+console.log('popup.js loaded')
+
+import Model from './Model'
+
 document.addEventListener('DOMContentLoaded', () => {
-  const reloadBtn = document.querySelector('#reload-btn')
+  const model = new Model()
+
+  console.log('DOMContentLoaded')
+  const reloadBtn = document.getElementById('reload-btn')
+  const resetBtn = document.getElementById('reset-btn')
+
+  resetBtn?.addEventListener('click', () => {
+    console.log('reset')
+    model.reset()
+  })
 
   reloadBtn?.addEventListener('click', () => {
     console.log('reload')
-    localStorage.setItem('focusTimer_elapsed_today', String(0))
+    model.reset()
     chrome.runtime.reload()
   })
 })

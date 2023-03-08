@@ -77,12 +77,11 @@ export default class View {
 
   // Update the timer text every second
   updateDisplayText() {
-    const elapsed = this.model.elapsed()
-    // console.log(`${nowTime()} ${JSON.stringify(elapsed)}`)
-
-    if (this.displayClock in elapsed) {
-      this.div.innerText = `${this.displayClock[0]} ${formatTime(elapsed[this.displayClock].elapsed as number)}`
-    }
+    this.model.readElapsed().then((elapsed) => {
+      if (this.displayClock in elapsed) {
+        this.div.innerText = `${this.displayClock[0]} ${formatTime(elapsed[this.displayClock].elapsed as number)}`
+      }
+    })
   }
 
   handleClick = () => {
@@ -91,9 +90,11 @@ export default class View {
 
   handleBlur = () => {
     // nothing to do
+    this.div.style.background = '#433'
   }
 
   handleFocus = () => {
+    this.div.style.background = '#333'
     // update the display text
     this.updateDisplayText()
   }
@@ -101,8 +102,10 @@ export default class View {
   handleVisibilityChange = () => {
     if (document.hidden) {
       // nothing to do
+      this.div.style.background = '#433'
     } else {
       this.updateDisplayText()
+      this.div.style.background = '#333'
     }
   }
 }

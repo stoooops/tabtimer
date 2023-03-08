@@ -3,7 +3,7 @@ export enum TimerType {
   FOCUS = 'focus',
 }
 
-enum TimerState {
+export enum TimerState {
   NOT_STARTED = 'not_started',
   RUNNING = 'running',
   PAUSED = 'paused',
@@ -60,20 +60,16 @@ export default class Timer {
     if (this.state === TimerState.NOT_STARTED) {
       return
     }
-    if (this.state !== TimerState.RUNNING && this.state !== TimerState.PAUSED) {
-      // error condition unexpected
-      throw new Error('Cannot stop a timer that is not in the RUNNING or PAUSED state')
+    if (this.timerId) {
+      // Stop the timer
+      clearInterval(this.timerId)
     }
-    if (this.timerId === null) {
-      throw new Error(`timerId is null but state is ${this.state}`)
-    }
-    // Stop the timer
-    clearInterval(this.timerId)
     this.timerId = null
     this.startTime = null
     this.updateElapsed(0)
     this.pauseTime = null
     this.elapsedPause = 0
+    this.state = TimerState.NOT_STARTED
   }
 
   // Pause the timer
@@ -106,5 +102,13 @@ export default class Timer {
     this.state = TimerState.RUNNING
     this.elapsedPause += Date.now() - this.pauseTime!
     this.timerId = setInterval(this.tick.bind(this), this.interval)
+  }
+
+  // Reset the timer and elapsed time
+  reset() {
+    if (this.state !== TimerState.NOT_STARTED) {
+      this.stop()
+      this.start()
+    }
   }
 }

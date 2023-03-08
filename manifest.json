@@ -15,37 +15,32 @@
     "scripts": ["background.js"],
     "persistent": false
   },
+  "permissions": ["storage", "tabs"],
   "content_scripts": [
     {
       "matches": [
         "*://blank.org/*",
-        "*://*.twitter.com/*",
-        "*://*.facebook.com/*",
-        "*://*.reddit.com/*",
-        "*://*.youtube.com/*",
-        "*://*.instagram.com/*",
-        "*://*.tumblr.com/*",
-        "*://*.pinterest.com/*",
-        "*://*.linkedin.com/*",
-        "*://*.quora.com/*",
-        "*://*.twitch.tv/*",
-        "*://*.tiktok.com/*",
-        "*://*.snapchat.com/*",
         "*://*.discord.com/*",
-        "*://*.whatsapp.com/*",
-        "*://*.slack.com/*",
-        "*://*.messenger.com/*",
-        "*://*.telegram.org/*",
         "*://*.discordapp.com/*",
-        "*://*.skype.com/*",
-        "*://*.zoom.us/*",
-        "*://*.meet.google.com/*",
-        "*://*.hangouts.google.com/*",
-        "*://*.me"
+        "*://*.facebook.com/*",
+        "*://*.instagram.com/*",
+        "*://*.linkedin.com/*",
+        "*://*.pinterest.com/*",
+        "*://*.messenger.com/*",
+        "*://*.quora.com/*",
+        "*://*.reddit.com/*",
+        "*://*.slack.com/*",
+        "*://*.snapchat.com/*",
+        "*://*.telegram.org/*",
+        "*://*.tiktok.com/*",
+        "*://*.twitch.tv/*",
+        "*://*.twitter.com/*",
+        "*://*.tumblr.com/*",
+        "*://*.whatsapp.com/*",
+        "*://*.youtube.com/*"
       ],
       "js": ["content.js"]
     }
   ],
-  "permissions": ["tabs"],
-  "web_accessible_resources": ["content.js", "background.js"]
+  "web_accessible_resources": []
 }
