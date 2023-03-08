@@ -14,13 +14,13 @@ function formatTime(millis: number): `${string}:${string}:${string}` {
   return `${pad(hours)}:${pad(minutes % 60)}:${pad(seconds % 60)}`
 }
 
-function nowTime(): string {
-  return `${new Date().toLocaleTimeString('en-US', { hour12: false })}`
-}
-
 type DisplayClockType = TimerType | 'today'
 const DISPLAY_ORDER: DisplayClockType[] = ['today', TimerType.FOCUS, TimerType.COUNTUP]
-
+const BACKGROUNDS: Record<DisplayClockType, string> = {
+  [TimerType.COUNTUP]: '#000',
+  [TimerType.FOCUS]: '#888',
+  today: '#303030',
+}
 export default class View {
   private div: HTMLDivElement
   private displayClock: DisplayClockType = DISPLAY_ORDER[0]
@@ -30,15 +30,15 @@ export default class View {
     this.div.style.top = '0'
     this.div.style.left = '50%'
     this.div.style.transform = 'translateX(-50%)'
-    this.div.style.padding = '5px 10px'
-    this.div.style.background = '#333'
+    this.div.style.padding = '4px 8px'
+    this.div.style.background = BACKGROUNDS[this.displayClock]
     this.div.style.borderRadius = '0 0 5px 5px'
     this.div.style.boxShadow = '0px 0px 5px 0px rgba(0, 0, 0, 0.2)'
     this.div.style.zIndex = '9999'
     this.div.style.color = '#FFF'
     this.div.style.textAlign = 'center'
     this.div.style.fontFamily = 'monospace'
-    this.div.style.fontSize = '14px'
+    this.div.style.fontSize = '12px'
     this.div.style.cursor = 'pointer'
 
     const triangle = document.createElement('div')
@@ -79,7 +79,8 @@ export default class View {
   updateDisplayText() {
     this.model.readElapsed().then((elapsed) => {
       if (this.displayClock in elapsed) {
-        this.div.innerText = `${this.displayClock[0]} ${formatTime(elapsed[this.displayClock].elapsed as number)}`
+        this.div.innerText = `${formatTime(elapsed[this.displayClock].elapsed as number)}`
+        this.div.style.background = BACKGROUNDS[this.displayClock]
       }
     })
   }
