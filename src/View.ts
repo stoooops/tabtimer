@@ -19,8 +19,14 @@ const DISPLAY_ORDER: DisplayClockType[] = ['today', TimerType.FOCUS, TimerType.C
 const BACKGROUNDS: Record<DisplayClockType, string> = {
   [TimerType.COUNTUP]: '#000',
   [TimerType.FOCUS]: '#888',
-  today: '#303030',
+  today: 'rgba(32, 32, 32, 0.1)',
 }
+
+const MILLIS_15_MIN = 15 * 60 * 1000
+const MILLIS_30_MIN = 30 * 60 * 1000
+const MILLIS_1_HOUR = 1 * 60 * 60 * 1000
+const MILLIS_2_HOURS = 2 * 60 * 60 * 1000
+const MILLIS_3_HOURS = 3 * 60 * 60 * 1000
 export default class View {
   private div: HTMLDivElement
   private displayClock: DisplayClockType = DISPLAY_ORDER[0]
@@ -30,8 +36,9 @@ export default class View {
     this.div.style.top = '0'
     this.div.style.left = '50%'
     this.div.style.transform = 'translateX(-50%)'
-    this.div.style.padding = '4px 8px'
-    this.div.style.background = BACKGROUNDS[this.displayClock]
+    this.div.style.padding = '5px 10px'
+    // make the background a little transparent so the page shows through
+    this.div.style.background = 'rgba(0, 0, 0, 0.5)'
     this.div.style.borderRadius = '0 0 5px 5px'
     this.div.style.boxShadow = '0px 0px 5px 0px rgba(0, 0, 0, 0.2)'
     this.div.style.zIndex = '9999'
@@ -68,6 +75,26 @@ export default class View {
     window.addEventListener('focus', this.handleFocus)
   }
 
+  private getBackground(displayClock: DisplayClockType) {
+    return BACKGROUNDS[displayClock]
+  }
+
+  private getFontSize = (millis: number) => {
+    if (millis > MILLIS_3_HOURS) {
+      return '20px'
+    } else if (millis > MILLIS_2_HOURS) {
+      return '18px'
+    } else if (millis > MILLIS_1_HOUR) {
+      return '16px'
+    } else if (millis > MILLIS_30_MIN) {
+      return '14px'
+    } else if (millis > MILLIS_15_MIN) {
+      return '12px'
+    } else {
+      return '10px'
+    }
+  }
+
   changeDisplayClock = () => {
     // rotate array according to DISPLAY_ORDER
     const index = DISPLAY_ORDER.indexOf(this.displayClock)
@@ -79,8 +106,10 @@ export default class View {
   updateDisplayText() {
     this.model.readElapsed().then((elapsed) => {
       if (this.displayClock in elapsed) {
-        this.div.innerText = `${formatTime(elapsed[this.displayClock].elapsed as number)}`
-        this.div.style.background = BACKGROUNDS[this.displayClock]
+        const millis = elapsed[this.displayClock].elapsed as number
+        this.div.innerText = `${formatTime(millis)}`
+        this.div.style.background = this.getBackground(this.displayClock)
+        this.div.style.fontSize = this.getFontSize(millis)
       }
     })
   }

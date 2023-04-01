@@ -110,8 +110,15 @@ export default class Model {
     }, millisecondsUntilResetTime)
   }
 
+  getKey(): string {
+    const today = new Date()
+    const key = `${KEY}_${today.getFullYear()}-${today.getMonth()}-${today.getDate()}`
+    return key
+  }
+
   // add diff to the storage
   updateStorageValues = (elapsed: number) => {
+    const key = this.getKey()
     // calculate the diff between the last time we updated the storage and now
     const diff = elapsed - this.previousStorageUpdateElapsedValue
     if (diff < 0) {
@@ -128,9 +135,9 @@ export default class Model {
     console.log(`updateStorageValues ${elapsed} - ${this.previousStorageUpdateElapsedValue} = ${diff}`)
     this.readStorageElapsedToday().then((storedVal) => {
       const val = storedVal + diff
-      console.log(`Updating local storage ${this.key} = ${val}...`)
-      storage.set(this.key, val, 'local').then(() => {
-        console.log(`Updated local storage ${this.key} = ${val}`)
+      console.log(`Updating local storage ${key} = ${val}...`)
+      storage.set(key, val, 'local').then(() => {
+        console.log(`Updated local storage ${key} = ${val}`)
         // update the previous value
         this.previousStorageUpdateElapsedValue = elapsed
         this.previousStorageUpdateTime = new Date()

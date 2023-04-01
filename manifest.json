@@ -1,6 +1,6 @@
 {
   "manifest_version": 2,
-  "name": "Tab Nanny",
+  "name": "Tab Timer",
   "description": "Watch how much time you've spent on a website today.",
   "version": "1.0",
   "icons": {
