@@ -45,7 +45,8 @@ export default class Model {
   private resetTimersAtTime: Date
   private previousStorageUpdateElapsedValue: number = 0
   private previousStorageUpdateTime: Date = new Date(0, 0, 0, 0, 0, 0)
-  private key: string
+  private baseKey: string
+  private resetTimeoutId: number | null = null
   constructor() {
     // ensure chrome.storage is initialized
     console.log('chrome', chrome)
@@ -60,7 +61,7 @@ export default class Model {
     while (parts.length > 2) {
       parts.shift()
     }
-    this.key = `${KEY}_${parts.join('.')}`
+    this.baseKey = `${KEY}_${parts.join('.')}`
 
     this.resetTimersAtTime = this.getResetTime()
   }
@@ -104,21 +105,28 @@ export default class Model {
     const h = Math.floor(hoursUntilResetTime % 24)
     const d = Math.floor(daysUntilResetTime)
     console.log(`Schedule reset timers at ${this.resetTimersAtTime.toISOString()} in ${d}d ${h}h ${m}m ${s}s ${ms}ms`)
-    setTimeout(() => {
+
+    if (this.resetTimeoutId !== null) {
+      clearTimeout(this.resetTimeoutId)
+    }
+    this.resetTimeoutId = setTimeout(() => {
       console.log(`Resetting timers due to reset time ${this.resetTimersAtTime.toISOString()}`)
       this.reset()
     }, millisecondsUntilResetTime)
   }
 
-  getKey(): string {
+  getTodayKey(): string {
     const today = new Date()
-    const key = `${KEY}_${today.getFullYear()}-${today.getMonth()}-${today.getDate()}`
+    // ISO date format and handle 0 padding
+    const key = `${this.baseKey}_${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(
+      today.getDate()
+    ).padStart(2, '0')}`
     return key
   }
 
   // add diff to the storage
   updateStorageValues = (elapsed: number) => {
-    const key = this.getKey()
+    const key = this.getTodayKey()
     // calculate the diff between the last time we updated the storage and now
     const diff = elapsed - this.previousStorageUpdateElapsedValue
     if (diff < 0) {
@@ -132,13 +140,11 @@ export default class Model {
     }
 
     // update the storage
-    console.log(`updateStorageValues ${elapsed} - ${this.previousStorageUpdateElapsedValue} = ${diff}`)
     this.readStorageElapsedToday().then((storedVal) => {
       const val = storedVal + diff
-      console.log(`Updating local storage ${key} = ${val}...`)
       storage.set(key, val, 'local').then(() => {
-        console.log(`Updated local storage ${key} = ${val}`)
         // update the previous value
+        console.log(`Updated local storage ${key} = ${val}`)
         this.previousStorageUpdateElapsedValue = elapsed
         this.previousStorageUpdateTime = new Date()
       })
@@ -146,13 +152,13 @@ export default class Model {
   }
 
   public readStorageElapsedToday(): Promise<number> {
-    return storage.get(this.key, 0, 'local')
+    return storage.get(this.getTodayKey(), 0, 'local')
   }
 
   private resetStorageValues(): Promise<void> {
-    console.log(`Resetting local storage ${this.key} = 0...`)
-    return storage.set(this.key, 0, 'local').then(() => {
-      console.log(`Reset local storage ${this.key} = 0`)
+    console.log(`Resetting local storage ${this.getTodayKey()} = 0...`)
+    return storage.set(this.getTodayKey(), 0, 'local').then(() => {
+      console.log(`Reset local storage ${this.getTodayKey()} = 0`)
     })
   }
 
@@ -199,6 +205,16 @@ export default class Model {
     this.resetTimers()
     this.resetStorageValues()
     this.resetTimersAtTime = this.getResetTime()
+
+    if (this.resetTimeoutId !== null) {
+      clearTimeout(this.resetTimeoutId)
+    }
+    const millisecondsUntilResetTime = this.resetTimersAtTime.getTime() - new Date().getTime()
+    console.log(`Schedule reset timers at ${this.resetTimersAtTime.toISOString()} in ${millisecondsUntilResetTime}ms`)
+    this.resetTimeoutId = setTimeout(() => {
+      console.log(`Resetting timers due to reset time ${this.resetTimersAtTime.toISOString()}`)
+      this.reset()
+    }, millisecondsUntilResetTime)
   }
 
   // Handle the blur event by pausing the focus timer
